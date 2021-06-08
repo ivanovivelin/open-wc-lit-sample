@@ -1,16 +1,11 @@
 import { Router } from '@vaadin/router';
-import './app.js';
 import './app/home/home.js';
+import './app/details/details.js';
 
 const outlet = document.getElementById('outlet');
 const router = new Router(outlet);
 
 router.setRoutes([
   { path: '/',     component: 'dc-lit-home' },
-  { path: '/about',     component: 'dc-lit-home' }
+  { path: '/details/:code',     component: 'dc-lit-details' }
 ]);
-
-window.addEventListener('popstate', (event) => {
-	// Log the state data to the console
-	console.log(event.state);
-});

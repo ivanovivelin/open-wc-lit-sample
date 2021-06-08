@@ -1,10 +1,11 @@
 import { LitElement, html, css } from 'lit';
-import "@vlocity-cme-wc/digitalcommerce-components-src/vlocity-dc-toast/vlocity-dc-toast.js";
-import "@vlocity-cme-wc/digitalcommerce-components-src/vlocity-dc-catalog/vlocity-dc-catalog.js";
-import "@vlocity-cme-wc/digitalcommerce-components-src/vlocity-dc-child-catalog/vlocity-dc-child-catalog.js";
-import "@vlocity-cme-wc/digitalcommerce-components-src/vlocity-dc-offers-list/vlocity-dc-offers-list.js";
+import '@vlocity-cme-wc/digitalcommerce-components-src/vlocity-dc-toast/vlocity-dc-toast.js';
+import '@vlocity-cme-wc/digitalcommerce-components-src/vlocity-dc-catalog/vlocity-dc-catalog.js';
+import '@vlocity-cme-wc/digitalcommerce-components-src/vlocity-dc-child-catalog/vlocity-dc-child-catalog.js';
+import '@vlocity-cme-wc/digitalcommerce-components-src/vlocity-dc-offers-list/vlocity-dc-offers-list.js';
 import { digitalCommerceSDKInstance } from '@vlocity-cme-wc/digitalcommerce-components-src/vlocity-dc-utils/vlocity-dc-sdk-utils';
-import { DCCustomLabels } from "@vlocity-cme-wc/digitalcommerce-components-src/vlocity-dc-utils/vlocity-dc-custom-labels";
+import { DCCustomLabels } from '@vlocity-cme-wc/digitalcommerce-components-src/vlocity-dc-utils/vlocity-dc-custom-labels';
+import { Router } from '@vaadin/router';
 
 export class Home extends LitElement {
   static get properties() {
@@ -26,16 +27,40 @@ export class Home extends LitElement {
 
   constructor() {
     super();
-    this.catalogCode = "IDX";
+    this.catalogCode = 'IDX';
     this.language = digitalCommerceSDKInstance().digitalCommerce.language
       ? digitalCommerceSDKInstance().digitalCommerce.language
-      : "en_US";
-      Home.getLabels(DCCustomLabels, this.language);
+      : 'en_US';
+    Home.getLabels(DCCustomLabels, this.language);
+    this.digitalCommerceSDK = digitalCommerceSDKInstance().digitalCommerce;
+    this.digitalCommerceTranslation =
+      digitalCommerceSDKInstance().digitalCommerceTranslation;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.selectOfferEventHandler = {
+      result: Home.selectOffer.bind(this),
+    };
+    this.digitalCommerceSDK.register(
+      'vlocity-dc-offer-selected',
+      this.selectOfferEventHandler
+    );
+  }
+
+  static selectOffer(data) {
+    Home.switchRoute(`details/${data.offer.offerCode}`);
+  }
+
+  static switchRoute(route) {
+    Router.go(`/${route}`); 
   }
 
   static getLabels(labelList, language) {
-    const translationSDK = digitalCommerceSDKInstance().digitalCommerceTranslation;
-    const fetchTranslationsInput = translationSDK.createFetchTranslationsInput();
+    const translationSDK =
+      digitalCommerceSDKInstance().digitalCommerceTranslation;
+    const fetchTranslationsInput =
+      translationSDK.createFetchTranslationsInput();
     fetchTranslationsInput.textToTranslate = labelList;
     fetchTranslationsInput.language = language;
     return translationSDK.fetchTranslations(fetchTranslationsInput);
@@ -43,19 +68,12 @@ export class Home extends LitElement {
 
   render() {
     return html`
-        <vlocity-dc-catalog
-          catalogCode=${this.catalogCode}
-        >
-        </vlocity-dc-catalog>
+      <vlocity-dc-catalog catalogCode=${this.catalogCode}> </vlocity-dc-catalog>
 
-        <vlocity-dc-offers-list
-          catalogCode=${this.catalogCode}
-        >
-        </vlocity-dc-offers-list>
-
+      <vlocity-dc-offers-list catalogCode=${this.catalogCode}>
+      </vlocity-dc-offers-list>
     `;
   }
 }
-
 
 customElements.define('dc-lit-home', Home);
